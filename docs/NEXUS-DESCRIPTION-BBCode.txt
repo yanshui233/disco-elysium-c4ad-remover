@@ -1,0 +1,48 @@
+NEXUS MODS DESCRIPTION -- paste into the "BBCode" editor tab.
+Nexus does NOT render Markdown from the description editor, so this is the
+BBCode-converted version of the block in NEXUS-UPLOAD.md. Copy everything
+below the dashed line.
+
+------------------------------------------------------------------------------
+
+[size=6][b]Zero Parades Banner Remover[/b][/size]
+
+[size=5][b]What this does[/b][/size]
+Removes the [b]ZERO PARADES[/b] promotional banner that was added to the Disco Elysium main menu and pause screen in the late-2025 update.
+
+It moves the banner's UI element off-screen ([font=Courier New]RectTransform.m_AnchoredPosition.y 0 -> -10000[/font]). Nothing is re-serialised, nothing is injected, no mod loader is involved.
+
+[size=5][b]Why not just disable the element?[/b][/size]
+Because it doesn't work -- and this is the part most quick fixes get wrong. The game [b]re-activates[/b] the [font=Courier New]C4Ad[/font] object from code every time the menu loads, so flipping its [font=Courier New]m_IsActive[/font] byte to [font=Courier New]0[/font] is silently ignored (and throws a harmless [font=Courier New]NullReferenceException[/font]). Moving the transform is not touched by any code, so the banner actually stays gone.
+
+[size=5][b]Install (Windows, no Python needed)[/b][/size]
+[list=1]
+[*]Extract the archive anywhere.
+[*]Close the game.
+[*]Run [font=Courier New]install.bat[/font].
+[/list]
+It auto-detects Steam and GOG installs, backs up the original next to it, and verifies the result. Extracting the archive into the game folder itself works too -- detection uses the script's own location first. If detection fails, drag your game folder onto [font=Courier New]install.bat[/font].
+
+[size=5][b]Uninstall[/b][/size]
+Run [font=Courier New]uninstall.bat[/font] for a full removal: it restores the original file, deletes the backup the installer created, and verifies the result is what ZA/UM shipped. Use [font=Courier New]revert.bat[/font] instead if you only want to roll the patch back but keep the backup around.
+
+[font=Courier New]uninstall.bat[/font] also works if you deleted the backup -- it recognises its own patch and writes the four bytes back in place, and it repairs the [font=Courier New]m_IsActive[/font] byte if an old v1.0.0 release left it at [font=Courier New]0[/font]. If the file is neither the original nor the patched state, it changes nothing and tells you why. Verifying the game files in Steam/GOG is always an option too.
+
+[size=5][b]After a game update[/b][/size]
+Updates replace the file and the banner returns. Just run [font=Courier New]install.bat[/font] again -- the element is located by structural fingerprint, not a fixed offset, so it keeps working on new builds.
+
+[size=5][b]Technical[/b][/size]
+[list]
+[*]File: [font=Courier New]disco_Data\level2[/font] ([font=Courier New]Init.unity[/font], always-resident scene)
+[*]Object: [font=Courier New]GameObject "C4Ad"[/font] under [font=Courier New]UI / Global UI Canvas / Global UI Fitter / Menu Rock-in[/font]
+[*]Its component holds [url=https://store.steampowered.com/app/2863680]https://store.steampowered.com/app/2863680[/url] -- that is how it was identified
+[*]Patch: [font=Courier New]RectTransform.m_AnchoredPosition.y[/font], one [font=Courier New]float32[/font], [font=Courier New]0 -> -10000[/font]
+[*]It is the only promotional object in the game files (checked across all scenes and all 1827 asset bundles), so it covers the main menu and the pause screen
+[/list]
+Full write-up is in the GitHub repository.
+
+[size=5][b]Notes[/b][/size]
+[list]
+[*]Safe for saves, achievements and Steam Deck (use [font=Courier New]c4ad_mod.py[/font] there).
+[*]This archive contains no Disco Elysium assets -- it patches the copy on your own disk.
+[/list]
